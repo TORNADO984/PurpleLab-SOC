@@ -6,4 +6,6 @@ The first live integration run on 2026-11-10 used Elastic 9.5.6 and verified tha
 
 The offline checks currently include 11 tests, Python compilation, Ruff critical errors and unused imports, deterministic content generation, and `docker compose config --quiet`. All pass locally. The [manual integration CI job](../.github/workflows/ci.yml) provides an independent clean deployment gate; the user can trigger it after the repository is pushed.
 
+The optional Filebeat 9.5.6 profile was also exercised with four fresh discovery fixtures (`f6f55011-36b8-4d03-875f-11e208f8b95d`). Filebeat reported four events acknowledged by Elasticsearch, and an independent count query found four events in `purplelab-events-*` for that run. This verifies the optional NDJSON shipper, not the real Windows VM path.
+
 Do not present the coverage dashboard's alert counts as evidence of complete ATT&CK coverage. A synthetic pass does not certify real Windows ingestion or arbitrary Atomic tests. Preserve the JSON result from a fresh `docker compose run --rm lab validate` with its run ID, positive/negative event counts, observed rules, execution status and absence of negative alerts here or in a CI artifact.
