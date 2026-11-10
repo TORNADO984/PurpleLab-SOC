@@ -1,0 +1,35 @@
+id: collection
+name: Trace local archive staging
+description: 7-Zip creates an archive under Users\Public. Correlate process and file
+  evidence while keeping collection separate from exfiltration.
+techniques:
+- T1074.001
+- T1560.001
+authorized_use_only: true
+generate: docker compose run --rm lab generate --scenario collection
+validate: docker compose run --rm lab validate --scenario collection
+expected_rules:
+- df83bda3-25ba-59ed-8132-e59729f6a6a5
+- 1aed0717-2831-5548-9200-7ffc65d4b933
+playbook:
+- Inspect the 7z.exe command and identify source glob and archive output path. Do
+  not open unknown archives.
+- Locate the Sysmon file creation event and compare file.path with the command's output
+  path.
+- Record host/user/time and explain that a common path supports correlation but is
+  weaker than a shared process entity.
+- Check approved support bundle or backup jobs, data classification and directory
+  permissions.
+- Search for subsequent connections or file transfers using the same process/host.
+  This scenario contains no transfer event, so exfiltration remains unproven.
+- Document the archive as staged data and request approved metadata/hash collection
+  in a real incident. Avoid placing sensitive contents in the case ticket.
+false_positives:
+- Support bundles and backups are often archived; verify source data, destination
+  and authorized recipient.
+- Approved support collections can use public folders; review permissions and retention.
+queries:
+- 'purplelab.scenario: "collection"'
+- 'event.code: ("1" OR "11")'
+disposition: Escalate unapproved collection of sensitive data; do not label the case
+  exfiltration without transfer evidence.

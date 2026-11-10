@@ -1,0 +1,27 @@
+title: Local account enumeration
+id: b153aa43-4a8d-54dc-a2f7-3152a53300e1
+status: experimental
+description: Account enumeration may precede credential attacks.
+author: PurpleLab-SOC contributors
+date: '2026-11-10'
+license: MIT
+references:
+- https://attack.mitre.org/techniques/T1087/001/
+tags:
+- attack.discovery
+- attack.t1087.001
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 1
+    Image|endswith:
+    - \net.exe
+    - \net1.exe
+    CommandLine|contains: ' user'
+  condition: selection
+falsepositives:
+- Inventory and support tasks enumerate users; correlate with the operator's change
+  window.
+level: low

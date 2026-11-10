@@ -1,0 +1,40 @@
+id: persistence
+name: Review three persistence mechanisms
+description: An endpoint adds an AppData Run key, creates a PowerShell task, and installs
+  a service under a shared writable directory.
+techniques:
+- T1053.005
+- T1543.003
+- T1547.001
+authorized_use_only: true
+generate: docker compose run --rm lab generate --scenario persistence
+validate: docker compose run --rm lab validate --scenario persistence
+expected_rules:
+- b5a789cb-63da-5dbc-969a-5e2629a221f3
+- 724d23f6-b801-519d-a6be-dfe2aa981049
+- 6827f56b-d089-5a6d-8667-649742b792cf
+playbook:
+- Identify each of the three alerts and order them by @timestamp. Record user and
+  host context independently for each.
+- Read registry.path and Details. Determine which account owns the Run key and whether
+  its executable directory is writable.
+- Inspect TaskName and TaskContent as text. Extract the command; request complete
+  trigger, principal and author fields in a real investigation.
+- Inspect service name and ImagePath. Compare the binary path to authorized software
+  inventory and expected file permissions.
+- Search for execution of the referenced paths after registration. The synthetic scenario
+  demonstrates registration only, so absence of execution does not prove removal.
+- Document an approval or escalation decision for each mechanism. In a real response,
+  preserve configuration and binary evidence before approved removal.
+false_positives:
+- User-installed collaboration software commonly uses Run keys; check publisher and
+  installation history.
+- Administration tasks may run signed PowerShell; compare task author, trigger and
+  registration ticket.
+- Some legacy installers use writable directories; confirm the vendor and remediate
+  weak permissions.
+queries:
+- 'purplelab.scenario: "persistence"'
+- 'event.code: ("13" OR "4698" OR "7045")'
+disposition: Escalate unapproved persistence, particularly a privileged service running
+  from a shared writable path.

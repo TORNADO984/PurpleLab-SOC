@@ -1,0 +1,26 @@
+title: PowerShell web download
+id: 97eef628-38bf-5d94-9e40-634d871669cc
+status: experimental
+description: A web request from PowerShell deserves contextual review; no request
+  is actually made by this fixture.
+author: PurpleLab-SOC contributors
+date: '2026-11-10'
+license: MIT
+references:
+- https://attack.mitre.org/techniques/T1059/001/
+tags:
+- attack.execution
+- attack.t1059.001
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 1
+    Image|endswith: \powershell.exe
+    CommandLine|contains: Invoke-WebRequest
+  condition: selection
+falsepositives:
+- Signed deployment scripts can retrieve approved packages; compare the URL to the
+  change ticket.
+level: medium

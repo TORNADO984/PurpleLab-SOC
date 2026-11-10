@@ -1,0 +1,28 @@
+title: SAM registry hive export
+id: 7f86ae50-a0d9-5a79-9a62-7dc8b20267f5
+status: experimental
+description: Exporting SAM can expose local password hashes; correlate with SYSTEM
+  hive access.
+author: PurpleLab-SOC contributors
+date: '2026-11-10'
+license: MIT
+references:
+- https://attack.mitre.org/techniques/T1003/002/
+tags:
+- attack.credential_access
+- attack.t1003.002
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 1
+    Image|endswith: \reg.exe
+    CommandLine|contains|all:
+    - save
+    - HKLM\SAM
+  condition: selection
+falsepositives:
+- Authorized forensic acquisition may export hives; require a case number and explicit
+  host approval.
+level: high

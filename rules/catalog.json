@@ -1,0 +1,1107 @@
+[
+  {
+    "id": "encoded-powershell",
+    "title": "PowerShell encoded command",
+    "technique": "T1059.001",
+    "technique_name": "PowerShell",
+    "tactic": "execution",
+    "scenario": "execution",
+    "category": "process",
+    "severity": "medium",
+    "positive": {
+      "event.code": "1",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "process.command_line": "powershell.exe -NoProfile -EncodedCommand VwByAGkAdABlAC0ATwB1AHQAcAB1AHQAIABsAGEAYgA="
+    },
+    "negative": {
+      "event.code": "1",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "process.command_line": "powershell.exe -NoProfile -Command Get-Date"
+    },
+    "selection": {
+      "EventID": 1,
+      "Image|endswith": "\\powershell.exe",
+      "CommandLine|contains": "-EncodedCommand"
+    },
+    "false_positive": "Management agents may encode trusted scripts; validate the decoded content and approved deployment.",
+    "rationale": "Encoded script execution can conceal intent; encoding alone is not proof of maliciousness.",
+    "uuid": "a8c94457-cf0a-591b-ab17-f7cfc534ef43",
+    "query": "event.provider: \"Microsoft-Windows-Sysmon\" AND (event.code: \"1\") AND (process.executable: *\\\\powershell.exe) AND (process.command_line: *-EncodedCommand*)",
+    "native_filters": [
+      {
+        "term": {
+          "event.code": "1"
+        }
+      },
+      {
+        "wildcard": {
+          "process.executable": {
+            "value": "*\\\\powershell.exe",
+            "case_insensitive": true
+          }
+        }
+      },
+      {
+        "wildcard": {
+          "process.command_line": {
+            "value": "*-EncodedCommand*",
+            "case_insensitive": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "powershell-download",
+    "title": "PowerShell web download",
+    "technique": "T1059.001",
+    "technique_name": "PowerShell",
+    "tactic": "execution",
+    "scenario": "execution",
+    "category": "process",
+    "severity": "medium",
+    "positive": {
+      "event.code": "1",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "process.command_line": "powershell.exe Invoke-WebRequest https://updates.purplelab.test/check.txt"
+    },
+    "negative": {
+      "event.code": "1",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "process.command_line": "powershell.exe Get-Process"
+    },
+    "selection": {
+      "EventID": 1,
+      "Image|endswith": "\\powershell.exe",
+      "CommandLine|contains": "Invoke-WebRequest"
+    },
+    "false_positive": "Signed deployment scripts can retrieve approved packages; compare the URL to the change ticket.",
+    "rationale": "A web request from PowerShell deserves contextual review; no request is actually made by this fixture.",
+    "uuid": "97eef628-38bf-5d94-9e40-634d871669cc",
+    "query": "event.provider: \"Microsoft-Windows-Sysmon\" AND (event.code: \"1\") AND (process.executable: *\\\\powershell.exe) AND (process.command_line: *Invoke-WebRequest*)",
+    "native_filters": [
+      {
+        "term": {
+          "event.code": "1"
+        }
+      },
+      {
+        "wildcard": {
+          "process.executable": {
+            "value": "*\\\\powershell.exe",
+            "case_insensitive": true
+          }
+        }
+      },
+      {
+        "wildcard": {
+          "process.command_line": {
+            "value": "*Invoke-WebRequest*",
+            "case_insensitive": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "lsass-access",
+    "title": "Unusual LSASS process access",
+    "technique": "T1003.001",
+    "technique_name": "LSASS Memory",
+    "tactic": "credential-access",
+    "scenario": "credential-access",
+    "category": "process",
+    "severity": "high",
+    "positive": {
+      "event.code": "10",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Lab\\diagnostic.exe",
+      "winlog.event_data.TargetImage": "C:\\Windows\\System32\\lsass.exe",
+      "winlog.event_data.GrantedAccess": "0x1fffff"
+    },
+    "negative": {
+      "event.code": "10",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Lab\\diagnostic.exe",
+      "winlog.event_data.TargetImage": "C:\\Windows\\System32\\lsass.exe",
+      "winlog.event_data.GrantedAccess": "0x1000"
+    },
+    "selection": {
+      "EventID": 10,
+      "TargetImage|endswith": "\\lsass.exe",
+      "GrantedAccess": [
+        "0x1fffff",
+        "0x1f0fff"
+      ]
+    },
+    "false_positive": "EDR and approved diagnostic tools may access LSASS; corroborate signature, owner and access mask.",
+    "rationale": "High access masks against LSASS can indicate credential access. This does not prove a dump occurred.",
+    "uuid": "386c5daa-b277-5844-a68d-60c199980ce4",
+    "query": "event.provider: \"Microsoft-Windows-Sysmon\" AND (event.code: \"10\") AND (winlog.event_data.TargetImage: *\\\\lsass.exe) AND (winlog.event_data.GrantedAccess: \"0x1fffff\" OR winlog.event_data.GrantedAccess: \"0x1f0fff\")",
+    "native_filters": [
+      {
+        "term": {
+          "event.code": "10"
+        }
+      },
+      {
+        "wildcard": {
+          "winlog.event_data.TargetImage": {
+            "value": "*\\\\lsass.exe",
+            "case_insensitive": true
+          }
+        }
+      },
+      {
+        "bool": {
+          "should": [
+            {
+              "term": {
+                "winlog.event_data.GrantedAccess": "0x1fffff"
+              }
+            },
+            {
+              "term": {
+                "winlog.event_data.GrantedAccess": "0x1f0fff"
+              }
+            }
+          ],
+          "minimum_should_match": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "sam-export",
+    "title": "SAM registry hive export",
+    "technique": "T1003.002",
+    "technique_name": "Security Account Manager",
+    "tactic": "credential-access",
+    "scenario": "credential-access",
+    "category": "process",
+    "severity": "high",
+    "positive": {
+      "event.code": "1",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Windows\\System32\\reg.exe",
+      "process.command_line": "reg.exe save HKLM\\SAM C:\\Lab\\sam.hiv"
+    },
+    "negative": {
+      "event.code": "1",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Windows\\System32\\reg.exe",
+      "process.command_line": "reg.exe query HKLM\\SOFTWARE"
+    },
+    "selection": {
+      "EventID": 1,
+      "Image|endswith": "\\reg.exe",
+      "CommandLine|contains|all": [
+        "save",
+        "HKLM\\SAM"
+      ]
+    },
+    "false_positive": "Authorized forensic acquisition may export hives; require a case number and explicit host approval.",
+    "rationale": "Exporting SAM can expose local password hashes; correlate with SYSTEM hive access.",
+    "uuid": "7f86ae50-a0d9-5a79-9a62-7dc8b20267f5",
+    "query": "event.provider: \"Microsoft-Windows-Sysmon\" AND (event.code: \"1\") AND (process.executable: *\\\\reg.exe) AND (process.command_line: *save* AND process.command_line: *HKLM\\\\SAM*)",
+    "native_filters": [
+      {
+        "term": {
+          "event.code": "1"
+        }
+      },
+      {
+        "wildcard": {
+          "process.executable": {
+            "value": "*\\\\reg.exe",
+            "case_insensitive": true
+          }
+        }
+      },
+      {
+        "wildcard": {
+          "process.command_line": {
+            "value": "*save*",
+            "case_insensitive": true
+          }
+        }
+      },
+      {
+        "wildcard": {
+          "process.command_line": {
+            "value": "*HKLM\\\\SAM*",
+            "case_insensitive": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "run-key",
+    "title": "Run key points into a user profile",
+    "technique": "T1547.001",
+    "technique_name": "Registry Run Keys / Startup Folder",
+    "tactic": "persistence",
+    "scenario": "persistence",
+    "category": "registry",
+    "severity": "medium",
+    "positive": {
+      "event.code": "13",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "registry.path": "HKU\\S-1-5-21-1000\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\LabUpdater",
+      "winlog.event_data.Details": "C:\\Users\\lab.analyst\\AppData\\Local\\Lab\\updater.exe",
+      "process.executable": "C:\\Windows\\System32\\cmd.exe"
+    },
+    "negative": {
+      "event.code": "13",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "registry.path": "HKCU\\Software\\PurpleLab\\Preferences",
+      "winlog.event_data.Details": "C:\\Users\\lab.analyst\\AppData\\Local\\Lab\\updater.exe",
+      "process.executable": "C:\\Windows\\System32\\cmd.exe"
+    },
+    "selection": {
+      "EventID": 13,
+      "TargetObject|contains": "\\CurrentVersion\\Run\\",
+      "Details|contains": "\\AppData\\"
+    },
+    "false_positive": "User-installed collaboration software commonly uses Run keys; check publisher and installation history.",
+    "rationale": "User-writable autorun targets can provide persistence.",
+    "uuid": "b5a789cb-63da-5dbc-969a-5e2629a221f3",
+    "query": "event.provider: \"Microsoft-Windows-Sysmon\" AND (event.code: \"13\") AND (registry.path: *\\\\CurrentVersion\\\\Run\\\\*) AND (winlog.event_data.Details: *\\\\AppData\\\\*)",
+    "native_filters": [
+      {
+        "term": {
+          "event.code": "13"
+        }
+      },
+      {
+        "wildcard": {
+          "registry.path": {
+            "value": "*\\\\CurrentVersion\\\\Run\\\\*",
+            "case_insensitive": true
+          }
+        }
+      },
+      {
+        "wildcard": {
+          "winlog.event_data.Details": {
+            "value": "*\\\\AppData\\\\*",
+            "case_insensitive": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "scheduled-task",
+    "title": "Scheduled task invokes PowerShell",
+    "technique": "T1053.005",
+    "technique_name": "Scheduled Task",
+    "tactic": "persistence",
+    "scenario": "persistence",
+    "category": "configuration",
+    "severity": "medium",
+    "positive": {
+      "event.code": "4698",
+      "event.provider": "Microsoft-Windows-Security-Auditing",
+      "winlog.event_data.TaskName": "\\Lab\\Inventory",
+      "winlog.event_data.TaskContent": "<Task><Actions><Exec><Command>powershell.exe</Command></Exec></Actions></Task>"
+    },
+    "negative": {
+      "event.code": "4698",
+      "event.provider": "Microsoft-Windows-Security-Auditing",
+      "winlog.event_data.TaskName": "\\Lab\\Inventory",
+      "winlog.event_data.TaskContent": "<Task><Actions><Exec><Command>notepad.exe</Command></Exec></Actions></Task>"
+    },
+    "selection": {
+      "EventID": 4698,
+      "TaskContent|contains": "powershell.exe"
+    },
+    "false_positive": "Administration tasks may run signed PowerShell; compare task author, trigger and registration ticket.",
+    "rationale": "PowerShell scheduled execution warrants examination of the complete task XML.",
+    "uuid": "724d23f6-b801-519d-a6be-dfe2aa981049",
+    "query": "event.provider: \"Microsoft-Windows-Security-Auditing\" AND (event.code: \"4698\") AND (winlog.event_data.TaskContent: *powershell.exe*)",
+    "native_filters": [
+      {
+        "term": {
+          "event.code": "4698"
+        }
+      },
+      {
+        "wildcard": {
+          "winlog.event_data.TaskContent": {
+            "value": "*powershell.exe*",
+            "case_insensitive": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "service-install",
+    "title": "Service installed from a writable path",
+    "technique": "T1543.003",
+    "technique_name": "Windows Service",
+    "tactic": "persistence",
+    "scenario": "persistence",
+    "category": "configuration",
+    "severity": "high",
+    "positive": {
+      "event.code": "7045",
+      "event.provider": "Service Control Manager",
+      "winlog.event_data.ServiceName": "LabUpdate",
+      "winlog.event_data.ImagePath": "C:\\Users\\Public\\Lab\\service.exe"
+    },
+    "negative": {
+      "event.code": "7045",
+      "event.provider": "Service Control Manager",
+      "winlog.event_data.ServiceName": "LabUpdate",
+      "winlog.event_data.ImagePath": "C:\\Program Files\\ApprovedVendor\\service.exe"
+    },
+    "selection": {
+      "EventID": 7045,
+      "ImagePath|contains": "\\Users\\Public\\"
+    },
+    "false_positive": "Some legacy installers use writable directories; confirm the vendor and remediate weak permissions.",
+    "rationale": "A service executable in a shared writable directory creates a persistence opportunity.",
+    "uuid": "6827f56b-d089-5a6d-8667-649742b792cf",
+    "query": "event.provider: \"Service Control Manager\" AND (event.code: \"7045\") AND (winlog.event_data.ImagePath: *\\\\Users\\\\Public\\\\*)",
+    "native_filters": [
+      {
+        "term": {
+          "event.code": "7045"
+        }
+      },
+      {
+        "wildcard": {
+          "winlog.event_data.ImagePath": {
+            "value": "*\\\\Users\\\\Public\\\\*",
+            "case_insensitive": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "user-discovery",
+    "title": "Interactive user discovery",
+    "technique": "T1033",
+    "technique_name": "System Owner/User Discovery",
+    "tactic": "discovery",
+    "scenario": "discovery",
+    "category": "process",
+    "severity": "low",
+    "positive": {
+      "event.code": "1",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Windows\\System32\\whoami.exe",
+      "process.command_line": "whoami.exe /all"
+    },
+    "negative": {
+      "event.code": "1",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Windows\\System32\\hostname.exe",
+      "process.command_line": "hostname.exe"
+    },
+    "selection": {
+      "EventID": 1,
+      "Image|endswith": "\\whoami.exe",
+      "CommandLine|contains": "/all"
+    },
+    "false_positive": "Helpdesk scripts often collect identity and group membership; this is a low-confidence behavioral signal.",
+    "rationale": "Full identity and privilege enumeration is useful after initial access.",
+    "uuid": "1e155ba5-f9ff-5d3d-b5d9-95dae6612564",
+    "query": "event.provider: \"Microsoft-Windows-Sysmon\" AND (event.code: \"1\") AND (process.executable: *\\\\whoami.exe) AND (process.command_line: */all*)",
+    "native_filters": [
+      {
+        "term": {
+          "event.code": "1"
+        }
+      },
+      {
+        "wildcard": {
+          "process.executable": {
+            "value": "*\\\\whoami.exe",
+            "case_insensitive": true
+          }
+        }
+      },
+      {
+        "wildcard": {
+          "process.command_line": {
+            "value": "*/all*",
+            "case_insensitive": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "account-discovery",
+    "title": "Local account enumeration",
+    "technique": "T1087.001",
+    "technique_name": "Local Account",
+    "tactic": "discovery",
+    "scenario": "discovery",
+    "category": "process",
+    "severity": "low",
+    "positive": {
+      "event.code": "1",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Windows\\System32\\net.exe",
+      "process.command_line": "net.exe user"
+    },
+    "negative": {
+      "event.code": "1",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Windows\\System32\\net.exe",
+      "process.command_line": "net.exe help"
+    },
+    "selection": {
+      "EventID": 1,
+      "Image|endswith": [
+        "\\net.exe",
+        "\\net1.exe"
+      ],
+      "CommandLine|contains": " user"
+    },
+    "false_positive": "Inventory and support tasks enumerate users; correlate with the operator's change window.",
+    "rationale": "Account enumeration may precede credential attacks.",
+    "uuid": "b153aa43-4a8d-54dc-a2f7-3152a53300e1",
+    "query": "event.provider: \"Microsoft-Windows-Sysmon\" AND (event.code: \"1\") AND (process.executable: *\\\\net.exe OR process.executable: *\\\\net1.exe) AND (process.command_line: * user*)",
+    "native_filters": [
+      {
+        "term": {
+          "event.code": "1"
+        }
+      },
+      {
+        "bool": {
+          "should": [
+            {
+              "wildcard": {
+                "process.executable": {
+                  "value": "*\\\\net.exe",
+                  "case_insensitive": true
+                }
+              }
+            },
+            {
+              "wildcard": {
+                "process.executable": {
+                  "value": "*\\\\net1.exe",
+                  "case_insensitive": true
+                }
+              }
+            }
+          ],
+          "minimum_should_match": 1
+        }
+      },
+      {
+        "wildcard": {
+          "process.command_line": {
+            "value": "* user*",
+            "case_insensitive": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "system-discovery",
+    "title": "System information discovery",
+    "technique": "T1082",
+    "technique_name": "System Information Discovery",
+    "tactic": "discovery",
+    "scenario": "discovery",
+    "category": "process",
+    "severity": "low",
+    "positive": {
+      "event.code": "1",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Windows\\System32\\systeminfo.exe",
+      "process.command_line": "systeminfo.exe"
+    },
+    "negative": {
+      "event.code": "1",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Windows\\System32\\notepad.exe",
+      "process.command_line": "notepad.exe"
+    },
+    "selection": {
+      "EventID": 1,
+      "Image|endswith": "\\systeminfo.exe"
+    },
+    "false_positive": "Asset inventory routinely collects operating system information; inspect parent process and surrounding events.",
+    "rationale": "Host reconnaissance is relevant when chained with other unusual behavior.",
+    "uuid": "b175bb3a-dde4-5c39-866c-d8458e3a2ea4",
+    "query": "event.provider: \"Microsoft-Windows-Sysmon\" AND (event.code: \"1\") AND (process.executable: *\\\\systeminfo.exe)",
+    "native_filters": [
+      {
+        "term": {
+          "event.code": "1"
+        }
+      },
+      {
+        "wildcard": {
+          "process.executable": {
+            "value": "*\\\\systeminfo.exe",
+            "case_insensitive": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "network-discovery",
+    "title": "Network host enumeration",
+    "technique": "T1018",
+    "technique_name": "Remote System Discovery",
+    "tactic": "discovery",
+    "scenario": "discovery",
+    "category": "process",
+    "severity": "low",
+    "positive": {
+      "event.code": "1",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Windows\\System32\\net.exe",
+      "process.command_line": "net.exe view /domain"
+    },
+    "negative": {
+      "event.code": "1",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Windows\\System32\\net.exe",
+      "process.command_line": "net.exe help"
+    },
+    "selection": {
+      "EventID": 1,
+      "Image|endswith": [
+        "\\net.exe",
+        "\\net1.exe"
+      ],
+      "CommandLine|contains": " view"
+    },
+    "false_positive": "Administrators use net view to diagnose browsing; compare source host and account to normal support activity.",
+    "rationale": "Remote host discovery can reveal lateral movement targets.",
+    "uuid": "d434ac0c-2ed4-55ef-bb88-8a25e6fbba27",
+    "query": "event.provider: \"Microsoft-Windows-Sysmon\" AND (event.code: \"1\") AND (process.executable: *\\\\net.exe OR process.executable: *\\\\net1.exe) AND (process.command_line: * view*)",
+    "native_filters": [
+      {
+        "term": {
+          "event.code": "1"
+        }
+      },
+      {
+        "bool": {
+          "should": [
+            {
+              "wildcard": {
+                "process.executable": {
+                  "value": "*\\\\net.exe",
+                  "case_insensitive": true
+                }
+              }
+            },
+            {
+              "wildcard": {
+                "process.executable": {
+                  "value": "*\\\\net1.exe",
+                  "case_insensitive": true
+                }
+              }
+            }
+          ],
+          "minimum_should_match": 1
+        }
+      },
+      {
+        "wildcard": {
+          "process.command_line": {
+            "value": "* view*",
+            "case_insensitive": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "smb-connection",
+    "title": "SMB connection from a script interpreter",
+    "technique": "T1021.002",
+    "technique_name": "SMB/Windows Admin Shares",
+    "tactic": "lateral-movement",
+    "scenario": "lateral-movement",
+    "category": "network",
+    "severity": "medium",
+    "positive": {
+      "event.code": "3",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "destination.ip": "192.0.2.20",
+      "destination.port": 445,
+      "network.transport": "tcp"
+    },
+    "negative": {
+      "event.code": "3",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "destination.ip": "192.0.2.20",
+      "destination.port": 443,
+      "network.transport": "tcp"
+    },
+    "selection": {
+      "EventID": 3,
+      "Image|endswith": "\\powershell.exe",
+      "DestinationPort": 445
+    },
+    "false_positive": "Approved automation can access SMB shares; verify destination ownership and authentication events.",
+    "rationale": "An interpreter connecting to SMB is a contextual signal, not proof of remote execution.",
+    "uuid": "31319808-55f5-5079-9604-e41271523b3a",
+    "query": "event.provider: \"Microsoft-Windows-Sysmon\" AND (event.code: \"3\") AND (process.executable: *\\\\powershell.exe) AND (destination.port: \"445\")",
+    "native_filters": [
+      {
+        "term": {
+          "event.code": "3"
+        }
+      },
+      {
+        "wildcard": {
+          "process.executable": {
+            "value": "*\\\\powershell.exe",
+            "case_insensitive": true
+          }
+        }
+      },
+      {
+        "term": {
+          "destination.port": 445
+        }
+      }
+    ]
+  },
+  {
+    "id": "rdp-logon",
+    "title": "Remote interactive logon",
+    "technique": "T1021.001",
+    "technique_name": "Remote Desktop Protocol",
+    "tactic": "lateral-movement",
+    "scenario": "lateral-movement",
+    "category": "authentication",
+    "severity": "low",
+    "positive": {
+      "event.code": "4624",
+      "event.provider": "Microsoft-Windows-Security-Auditing",
+      "winlog.event_data.LogonType": "10",
+      "source.ip": "192.0.2.30",
+      "event.outcome": "success",
+      "winlog.event_data.TargetUserName": "lab.operator"
+    },
+    "negative": {
+      "event.code": "4624",
+      "event.provider": "Microsoft-Windows-Security-Auditing",
+      "winlog.event_data.LogonType": "2",
+      "source.ip": "192.0.2.30",
+      "event.outcome": "success",
+      "winlog.event_data.TargetUserName": "lab.operator"
+    },
+    "selection": {
+      "EventID": 4624,
+      "LogonType": "10"
+    },
+    "false_positive": "RDP is normal for approved administrators; verify source, destination, MFA and session authorization.",
+    "rationale": "Remote interactive logons support lateral movement investigation but are common benign events.",
+    "uuid": "bb77b39b-d1d8-5d06-99c4-d9bf5201b8b7",
+    "query": "event.provider: \"Microsoft-Windows-Security-Auditing\" AND (event.code: \"4624\") AND (winlog.event_data.LogonType: \"10\")",
+    "native_filters": [
+      {
+        "term": {
+          "event.code": "4624"
+        }
+      },
+      {
+        "term": {
+          "winlog.event_data.LogonType": "10"
+        }
+      }
+    ]
+  },
+  {
+    "id": "wmi-child",
+    "title": "Command shell spawned by WMI",
+    "technique": "T1047",
+    "technique_name": "Windows Management Instrumentation",
+    "tactic": "execution",
+    "scenario": "lateral-movement",
+    "category": "process",
+    "severity": "high",
+    "positive": {
+      "event.code": "1",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Windows\\System32\\cmd.exe",
+      "process.parent.executable": "C:\\Windows\\System32\\wbem\\WmiPrvSE.exe",
+      "process.command_line": "cmd.exe /c echo purplelab"
+    },
+    "negative": {
+      "event.code": "1",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Windows\\System32\\cmd.exe",
+      "process.parent.executable": "C:\\Windows\\explorer.exe",
+      "process.command_line": "cmd.exe /c echo purplelab"
+    },
+    "selection": {
+      "EventID": 1,
+      "Image|endswith": "\\cmd.exe",
+      "ParentImage|endswith": "\\WmiPrvSE.exe"
+    },
+    "false_positive": "Enterprise management platforms use WMI; correlate source logon and approved job history.",
+    "rationale": "WMI-spawned command interpreters can indicate remote execution.",
+    "uuid": "287bcb26-171d-5446-9c32-7a1ddea96231",
+    "query": "event.provider: \"Microsoft-Windows-Sysmon\" AND (event.code: \"1\") AND (process.executable: *\\\\cmd.exe) AND (process.parent.executable: *\\\\WmiPrvSE.exe)",
+    "native_filters": [
+      {
+        "term": {
+          "event.code": "1"
+        }
+      },
+      {
+        "wildcard": {
+          "process.executable": {
+            "value": "*\\\\cmd.exe",
+            "case_insensitive": true
+          }
+        }
+      },
+      {
+        "wildcard": {
+          "process.parent.executable": {
+            "value": "*\\\\WmiPrvSE.exe",
+            "case_insensitive": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "security-log-cleared",
+    "title": "Windows Security log cleared",
+    "technique": "T1070.001",
+    "technique_name": "Clear Windows Event Logs",
+    "tactic": "defense-evasion",
+    "scenario": "defense-evasion",
+    "category": "configuration",
+    "severity": "high",
+    "positive": {
+      "event.code": "1102",
+      "event.provider": "Microsoft-Windows-Security-Auditing",
+      "winlog.event_data.SubjectUserName": "lab.operator"
+    },
+    "negative": {
+      "event.code": "1100",
+      "event.provider": "Microsoft-Windows-Security-Auditing",
+      "winlog.event_data.SubjectUserName": "lab.operator"
+    },
+    "selection": {
+      "EventID": 1102
+    },
+    "false_positive": "A documented maintenance reset may clear a lab log; production resets require explicit approval.",
+    "rationale": "Clearing the Security log destroys local evidence; central copies may still exist.",
+    "uuid": "16c4ef5f-9ebe-5670-9641-262a13deef91",
+    "query": "event.provider: \"Microsoft-Windows-Security-Auditing\" AND (event.code: \"1102\")",
+    "native_filters": [
+      {
+        "term": {
+          "event.code": "1102"
+        }
+      }
+    ]
+  },
+  {
+    "id": "audit-disabled",
+    "title": "Audit policy disable command",
+    "technique": "T1562.002",
+    "technique_name": "Disable Windows Event Logging",
+    "tactic": "defense-evasion",
+    "scenario": "defense-evasion",
+    "category": "process",
+    "severity": "high",
+    "positive": {
+      "event.code": "1",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Windows\\System32\\auditpol.exe",
+      "process.command_line": "auditpol.exe /set /category:* /success:disable /failure:disable"
+    },
+    "negative": {
+      "event.code": "1",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Windows\\System32\\auditpol.exe",
+      "process.command_line": "auditpol.exe /get /category:*"
+    },
+    "selection": {
+      "EventID": 1,
+      "Image|endswith": "\\auditpol.exe",
+      "CommandLine|contains|all": [
+        "/set",
+        "disable"
+      ]
+    },
+    "false_positive": "Policy rollout can adjust auditing; verify the intended policy and subsequent telemetry availability.",
+    "rationale": "Disabling auditing can hide later actions. This fixture never changes host policy.",
+    "uuid": "c06f134c-ce0d-5007-b73e-ae03b602a64a",
+    "query": "event.provider: \"Microsoft-Windows-Sysmon\" AND (event.code: \"1\") AND (process.executable: *\\\\auditpol.exe) AND (process.command_line: */set* AND process.command_line: *disable*)",
+    "native_filters": [
+      {
+        "term": {
+          "event.code": "1"
+        }
+      },
+      {
+        "wildcard": {
+          "process.executable": {
+            "value": "*\\\\auditpol.exe",
+            "case_insensitive": true
+          }
+        }
+      },
+      {
+        "wildcard": {
+          "process.command_line": {
+            "value": "*/set*",
+            "case_insensitive": true
+          }
+        }
+      },
+      {
+        "wildcard": {
+          "process.command_line": {
+            "value": "*disable*",
+            "case_insensitive": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "lab-dns-beacon",
+    "title": "DNS query for the lab beacon domain",
+    "technique": "T1071.004",
+    "technique_name": "DNS",
+    "tactic": "command-and-control",
+    "scenario": "command-and-control",
+    "category": "network",
+    "severity": "medium",
+    "positive": {
+      "event.code": "22",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Lab\\beacon-simulator.exe",
+      "dns.question.name": "beacon.purplelab.test"
+    },
+    "negative": {
+      "event.code": "22",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Lab\\beacon-simulator.exe",
+      "dns.question.name": "www.example.com"
+    },
+    "selection": {
+      "EventID": 22,
+      "QueryName|endswith": ".purplelab.test"
+    },
+    "false_positive": "All .purplelab.test queries are training indicators. Replace this indicator for a real environment.",
+    "rationale": "A lab-only DNS indicator exercises domain matching; it does not detect arbitrary DNS tunneling.",
+    "uuid": "a1b4ebbb-cf3b-502d-ad08-9760242b2794",
+    "query": "event.provider: \"Microsoft-Windows-Sysmon\" AND (event.code: \"22\") AND (dns.question.name: *.purplelab.test)",
+    "native_filters": [
+      {
+        "term": {
+          "event.code": "22"
+        }
+      },
+      {
+        "wildcard": {
+          "dns.question.name": {
+            "value": "*.purplelab.test",
+            "case_insensitive": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "unusual-egress",
+    "title": "Script interpreter connection to TCP 4444",
+    "technique": "T1071.001",
+    "technique_name": "Web Protocols",
+    "tactic": "command-and-control",
+    "scenario": "command-and-control",
+    "category": "network",
+    "severity": "medium",
+    "positive": {
+      "event.code": "3",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "destination.ip": "198.51.100.10",
+      "destination.port": 4444,
+      "network.transport": "tcp"
+    },
+    "negative": {
+      "event.code": "3",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "destination.ip": "198.51.100.10",
+      "destination.port": 443,
+      "network.transport": "tcp"
+    },
+    "selection": {
+      "EventID": 3,
+      "Image|endswith": "\\powershell.exe",
+      "DestinationPort": 4444
+    },
+    "false_positive": "Developers may run test services on this port; confirm protocol with proxy or packet evidence.",
+    "rationale": "A lab HTTP-like connection on an unusual port exercises egress triage. Port alone cannot establish protocol.",
+    "uuid": "8f6149b6-c26a-5fdb-9c96-8e0b22059ef7",
+    "query": "event.provider: \"Microsoft-Windows-Sysmon\" AND (event.code: \"3\") AND (process.executable: *\\\\powershell.exe) AND (destination.port: \"4444\")",
+    "native_filters": [
+      {
+        "term": {
+          "event.code": "3"
+        }
+      },
+      {
+        "wildcard": {
+          "process.executable": {
+            "value": "*\\\\powershell.exe",
+            "case_insensitive": true
+          }
+        }
+      },
+      {
+        "term": {
+          "destination.port": 4444
+        }
+      }
+    ]
+  },
+  {
+    "id": "archive-staging",
+    "title": "Archive creation in a public directory",
+    "technique": "T1560.001",
+    "technique_name": "Archive via Utility",
+    "tactic": "collection",
+    "scenario": "collection",
+    "category": "process",
+    "severity": "medium",
+    "positive": {
+      "event.code": "1",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Program Files\\7-Zip\\7z.exe",
+      "process.command_line": "7z.exe a C:\\Users\\Public\\Lab\\bundle.zip C:\\Lab\\Reports\\*"
+    },
+    "negative": {
+      "event.code": "1",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Program Files\\7-Zip\\7z.exe",
+      "process.command_line": "7z.exe l C:\\Lab\\approved.zip"
+    },
+    "selection": {
+      "EventID": 1,
+      "Image|endswith": "\\7z.exe",
+      "CommandLine|contains|all": [
+        " a ",
+        "\\Users\\Public\\"
+      ]
+    },
+    "false_positive": "Support bundles and backups are often archived; verify source data, destination and authorized recipient.",
+    "rationale": "An archive in a shared staging directory can precede transfer; it is not proof of exfiltration.",
+    "uuid": "df83bda3-25ba-59ed-8132-e59729f6a6a5",
+    "query": "event.provider: \"Microsoft-Windows-Sysmon\" AND (event.code: \"1\") AND (process.executable: *\\\\7z.exe) AND (process.command_line: * a * AND process.command_line: *\\\\Users\\\\Public\\\\*)",
+    "native_filters": [
+      {
+        "term": {
+          "event.code": "1"
+        }
+      },
+      {
+        "wildcard": {
+          "process.executable": {
+            "value": "*\\\\7z.exe",
+            "case_insensitive": true
+          }
+        }
+      },
+      {
+        "wildcard": {
+          "process.command_line": {
+            "value": "* a *",
+            "case_insensitive": true
+          }
+        }
+      },
+      {
+        "wildcard": {
+          "process.command_line": {
+            "value": "*\\\\Users\\\\Public\\\\*",
+            "case_insensitive": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "staged-archive",
+    "title": "Archive file created in a public directory",
+    "technique": "T1074.001",
+    "technique_name": "Local Data Staging",
+    "tactic": "collection",
+    "scenario": "collection",
+    "category": "file",
+    "severity": "medium",
+    "positive": {
+      "event.code": "11",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Program Files\\7-Zip\\7z.exe",
+      "file.path": "C:\\Users\\Public\\Lab\\bundle.zip"
+    },
+    "negative": {
+      "event.code": "11",
+      "event.provider": "Microsoft-Windows-Sysmon",
+      "process.executable": "C:\\Program Files\\7-Zip\\7z.exe",
+      "file.path": "C:\\Users\\lab.analyst\\Documents\\approved.zip"
+    },
+    "selection": {
+      "EventID": 11,
+      "TargetFilename|contains": "\\Users\\Public\\",
+      "TargetFilename|endswith": ".zip"
+    },
+    "false_positive": "Approved support collections can use public folders; review permissions and retention.",
+    "rationale": "File creation corroborates archive staging but not any subsequent transfer.",
+    "uuid": "1aed0717-2831-5548-9200-7ffc65d4b933",
+    "query": "event.provider: \"Microsoft-Windows-Sysmon\" AND (event.code: \"11\") AND (file.path: *\\\\Users\\\\Public\\\\*) AND (file.path: *.zip)",
+    "native_filters": [
+      {
+        "term": {
+          "event.code": "11"
+        }
+      },
+      {
+        "wildcard": {
+          "file.path": {
+            "value": "*\\\\Users\\\\Public\\\\*",
+            "case_insensitive": true
+          }
+        }
+      },
+      {
+        "wildcard": {
+          "file.path": {
+            "value": "*.zip",
+            "case_insensitive": true
+          }
+        }
+      }
+    ]
+  }
+]

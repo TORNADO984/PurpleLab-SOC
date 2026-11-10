@@ -1,0 +1,25 @@
+title: Scheduled task invokes PowerShell
+id: 724d23f6-b801-519d-a6be-dfe2aa981049
+status: experimental
+description: PowerShell scheduled execution warrants examination of the complete task
+  XML.
+author: PurpleLab-SOC contributors
+date: '2026-11-10'
+license: MIT
+references:
+- https://attack.mitre.org/techniques/T1053/005/
+tags:
+- attack.persistence
+- attack.t1053.005
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4698
+    TaskContent|contains: powershell.exe
+  condition: selection
+falsepositives:
+- Administration tasks may run signed PowerShell; compare task author, trigger and
+  registration ticket.
+level: medium

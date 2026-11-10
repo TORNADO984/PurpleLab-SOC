@@ -1,0 +1,25 @@
+title: Command shell spawned by WMI
+id: 287bcb26-171d-5446-9c32-7a1ddea96231
+status: experimental
+description: WMI-spawned command interpreters can indicate remote execution.
+author: PurpleLab-SOC contributors
+date: '2026-11-10'
+license: MIT
+references:
+- https://attack.mitre.org/techniques/T1047/
+tags:
+- attack.execution
+- attack.t1047
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 1
+    Image|endswith: \cmd.exe
+    ParentImage|endswith: \WmiPrvSE.exe
+  condition: selection
+falsepositives:
+- Enterprise management platforms use WMI; correlate source logon and approved job
+  history.
+level: high

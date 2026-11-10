@@ -1,0 +1,25 @@
+title: Remote interactive logon
+id: bb77b39b-d1d8-5d06-99c4-d9bf5201b8b7
+status: experimental
+description: Remote interactive logons support lateral movement investigation but
+  are common benign events.
+author: PurpleLab-SOC contributors
+date: '2026-11-10'
+license: MIT
+references:
+- https://attack.mitre.org/techniques/T1021/001/
+tags:
+- attack.lateral_movement
+- attack.t1021.001
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4624
+    LogonType: '10'
+  condition: selection
+falsepositives:
+- RDP is normal for approved administrators; verify source, destination, MFA and session
+  authorization.
+level: low

@@ -1,0 +1,27 @@
+title: Network host enumeration
+id: d434ac0c-2ed4-55ef-bb88-8a25e6fbba27
+status: experimental
+description: Remote host discovery can reveal lateral movement targets.
+author: PurpleLab-SOC contributors
+date: '2026-11-10'
+license: MIT
+references:
+- https://attack.mitre.org/techniques/T1018/
+tags:
+- attack.discovery
+- attack.t1018
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 1
+    Image|endswith:
+    - \net.exe
+    - \net1.exe
+    CommandLine|contains: ' view'
+  condition: selection
+falsepositives:
+- Administrators use net view to diagnose browsing; compare source host and account
+  to normal support activity.
+level: low

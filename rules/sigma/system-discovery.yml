@@ -1,0 +1,24 @@
+title: System information discovery
+id: b175bb3a-dde4-5c39-866c-d8458e3a2ea4
+status: experimental
+description: Host reconnaissance is relevant when chained with other unusual behavior.
+author: PurpleLab-SOC contributors
+date: '2026-11-10'
+license: MIT
+references:
+- https://attack.mitre.org/techniques/T1082/
+tags:
+- attack.discovery
+- attack.t1082
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 1
+    Image|endswith: \systeminfo.exe
+  condition: selection
+falsepositives:
+- Asset inventory routinely collects operating system information; inspect parent
+  process and surrounding events.
+level: low

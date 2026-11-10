@@ -1,0 +1,165 @@
+{
+  "description": "Normalize raw Winlogbeat fields and preserve ECS synthetic fixtures",
+  "processors": [
+    {
+      "set": {
+        "field": "event.ingested",
+        "value": "{{{_ingest.timestamp}}}"
+      }
+    },
+    {
+      "set": {
+        "field": "event.code",
+        "copy_from": "winlog.event_id",
+        "ignore_empty_value": true,
+        "override": false
+      }
+    },
+    {
+      "set": {
+        "field": "event.provider",
+        "copy_from": "winlog.provider_name",
+        "ignore_empty_value": true,
+        "override": false
+      }
+    },
+    {
+      "set": {
+        "field": "process.executable",
+        "copy_from": "winlog.event_data.Image",
+        "ignore_empty_value": true,
+        "override": false
+      }
+    },
+    {
+      "set": {
+        "field": "process.command_line",
+        "copy_from": "winlog.event_data.CommandLine",
+        "ignore_empty_value": true,
+        "override": false
+      }
+    },
+    {
+      "set": {
+        "field": "process.parent.executable",
+        "copy_from": "winlog.event_data.ParentImage",
+        "ignore_empty_value": true,
+        "override": false
+      }
+    },
+    {
+      "set": {
+        "field": "destination.port",
+        "copy_from": "winlog.event_data.DestinationPort",
+        "ignore_empty_value": true,
+        "override": false
+      }
+    },
+    {
+      "set": {
+        "field": "file.path",
+        "copy_from": "winlog.event_data.TargetFilename",
+        "ignore_empty_value": true,
+        "override": false
+      }
+    },
+    {
+      "set": {
+        "field": "registry.path",
+        "copy_from": "winlog.event_data.TargetObject",
+        "ignore_empty_value": true,
+        "override": false
+      }
+    },
+    {
+      "set": {
+        "field": "dns.question.name",
+        "copy_from": "winlog.event_data.QueryName",
+        "ignore_empty_value": true,
+        "override": false
+      }
+    },
+    {
+      "set": {
+        "field": "process.executable",
+        "copy_from": "winlog.event_data.SourceImage",
+        "ignore_empty_value": true,
+        "override": false
+      }
+    },
+    {
+      "set": {
+        "field": "destination.ip",
+        "copy_from": "winlog.event_data.DestinationIp",
+        "ignore_empty_value": true,
+        "override": false
+      }
+    },
+    {
+      "set": {
+        "field": "source.ip",
+        "copy_from": "winlog.event_data.IpAddress",
+        "ignore_empty_value": true,
+        "override": false
+      }
+    },
+    {
+      "set": {
+        "field": "process.entity_id",
+        "copy_from": "winlog.event_data.ProcessGuid",
+        "ignore_empty_value": true,
+        "override": false
+      }
+    },
+    {
+      "set": {
+        "field": "user.name",
+        "copy_from": "winlog.event_data.TargetUserName",
+        "ignore_empty_value": true,
+        "override": false
+      }
+    },
+    {
+      "convert": {
+        "field": "event.code",
+        "type": "string",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "destination.port",
+        "type": "integer",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "purplelab.synthetic",
+        "value": false,
+        "override": false
+      }
+    },
+    {
+      "set": {
+        "field": "event.kind",
+        "value": "event",
+        "override": false
+      }
+    },
+    {
+      "remove": {
+        "field": "source.ip",
+        "if": "ctx.source?.ip == '-' || ctx.source?.ip == ''",
+        "ignore_missing": true
+      }
+    },
+    {
+      "remove": {
+        "field": "destination.ip",
+        "if": "ctx.destination?.ip == '-' || ctx.destination?.ip == ''",
+        "ignore_missing": true
+      }
+    }
+  ]
+}

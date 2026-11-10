@@ -1,0 +1,40 @@
+id: lateral-movement
+name: Investigate remote access indicators
+description: A PowerShell SMB connection, an RDP logon and a WMI-spawned shell appear.
+  Distinguish observed remote activity from an inferred attack path.
+techniques:
+- T1021.001
+- T1021.002
+- T1047
+authorized_use_only: true
+generate: docker compose run --rm lab generate --scenario lateral-movement
+validate: docker compose run --rm lab validate --scenario lateral-movement
+expected_rules:
+- 31319808-55f5-5079-9604-e41271523b3a
+- bb77b39b-d1d8-5d06-99c4-d9bf5201b8b7
+- 287bcb26-171d-5446-9c32-7a1ddea96231
+playbook:
+- Record source and destination addresses for the network and authentication events.
+  These are documentation-only IP ranges.
+- 'Inspect the Sysmon connection: destination port 445 and PowerShell image. Request
+  share name and SMB server logs for a real case.'
+- Read the 4624 LogonType 10 event and target user. Compare source IP and time to
+  authorized jump-host access.
+- Inspect the WmiPrvSE.exe parent of cmd.exe. Request associated network logon events
+  and management platform job records.
+- 'Avoid assuming all three events form one session: this fixture intentionally lacks
+  a shared logon ID. State the correlation gap.'
+- Document permitted administration or escalate unexpected remote access. Preserve
+  both source and destination evidence before approved isolation.
+false_positives:
+- Approved automation can access SMB shares; verify destination ownership and authentication
+  events.
+- RDP is normal for approved administrators; verify source, destination, MFA and session
+  authorization.
+- Enterprise management platforms use WMI; correlate source logon and approved job
+  history.
+queries:
+- 'purplelab.scenario: "lateral-movement"'
+- 'event.code: ("3" OR "4624" OR "1")'
+disposition: An unexpected account/source combined with WMI execution merits escalation;
+  an RDP event alone is informational.

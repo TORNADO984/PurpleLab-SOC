@@ -1,0 +1,35 @@
+id: execution
+name: Investigate suspicious PowerShell execution
+description: A workstation produces encoded PowerShell and a web retrieval command.
+  Determine whether they belong to an authorized deployment or require escalation.
+techniques:
+- T1059.001
+authorized_use_only: true
+generate: docker compose run --rm lab generate --scenario execution
+validate: docker compose run --rm lab validate --scenario execution
+expected_rules:
+- a8c94457-cf0a-591b-ab17-f7cfc534ef43
+- 97eef628-38bf-5d94-9e40-634d871669cc
+playbook:
+- Open the encoded-command alert, record the UTC timestamp, host, user and full command
+  line. Do not execute it.
+- Decode the Base64 argument as text in an offline analysis tool (UTF-16LE). This
+  fixture decodes to Write-Output lab. Explain why encoding is not itself malicious.
+- Pivot on host.name and process.entity_id to inspect process ancestry. Record missing
+  parent or signature fields as collection gaps.
+- Find the companion Invoke-WebRequest event and extract the URL. The .test destination
+  is inert training data; do not browse to a suspect URL.
+- Compare the timeline with approved deployment activity. For a real incident, request
+  proxy, DNS, script-block (4104) and file creation evidence.
+- Classify the training case as a validated detection. Document what additional evidence
+  would justify real containment.
+false_positives:
+- Management agents may encode trusted scripts; validate the decoded content and approved
+  deployment.
+- Signed deployment scripts can retrieve approved packages; compare the URL to the
+  change ticket.
+queries:
+- 'purplelab.scenario: "execution"'
+- 'process.executable: *powershell.exe'
+disposition: Escalate real unexpected encoded script execution with an untrusted parent
+  or destination; document approved automation with its ticket.

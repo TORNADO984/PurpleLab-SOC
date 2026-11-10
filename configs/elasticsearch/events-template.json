@@ -1,0 +1,25 @@
+{
+  "index_patterns": ["purplelab-events-*"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "purplelab-retention",
+      "index.default_pipeline": "purplelab-windows"
+    },
+    "mappings": {
+      "dynamic_templates": [{"strings": {"match_mapping_type": "string", "mapping": {"type": "keyword", "ignore_above": 8192}}}],
+      "properties": {
+        "@timestamp": {"type": "date"},
+        "event": {"properties": {"ingested": {"type": "date"}, "created": {"type": "date"}, "code": {"type": "keyword"}}},
+        "process": {"properties": {"command_line": {"type": "wildcard"}, "executable": {"type": "wildcard"}, "parent": {"properties": {"executable": {"type": "wildcard"}}}}},
+        "file": {"properties": {"path": {"type": "wildcard"}}},
+        "registry": {"properties": {"path": {"type": "wildcard"}}},
+        "source": {"properties": {"ip": {"type": "ip"}}},
+        "destination": {"properties": {"ip": {"type": "ip"}, "port": {"type": "integer"}}},
+        "purplelab": {"properties": {"synthetic": {"type": "boolean"}, "expected_match": {"type": "boolean"}}}
+      }
+    }
+  }
+}

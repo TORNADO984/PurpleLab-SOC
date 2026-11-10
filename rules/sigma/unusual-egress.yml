@@ -1,0 +1,26 @@
+title: Script interpreter connection to TCP 4444
+id: 8f6149b6-c26a-5fdb-9c96-8e0b22059ef7
+status: experimental
+description: A lab HTTP-like connection on an unusual port exercises egress triage.
+  Port alone cannot establish protocol.
+author: PurpleLab-SOC contributors
+date: '2026-11-10'
+license: MIT
+references:
+- https://attack.mitre.org/techniques/T1071/001/
+tags:
+- attack.command_and_control
+- attack.t1071.001
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 3
+    Image|endswith: \powershell.exe
+    DestinationPort: 4444
+  condition: selection
+falsepositives:
+- Developers may run test services on this port; confirm protocol with proxy or packet
+  evidence.
+level: medium

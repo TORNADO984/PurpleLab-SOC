@@ -1,0 +1,36 @@
+id: defense-evasion
+name: Assess lost Windows audit visibility
+description: A Security log clear and an audit policy disable command are observed.
+  Practice establishing the time window where evidence may be missing.
+techniques:
+- T1070.001
+- T1562.002
+authorized_use_only: true
+generate: docker compose run --rm lab generate --scenario defense-evasion
+validate: docker compose run --rm lab validate --scenario defense-evasion
+expected_rules:
+- 16c4ef5f-9ebe-5670-9641-262a13deef91
+- c06f134c-ce0d-5007-b73e-ae03b602a64a
+playbook:
+- Record the 1102 event time and SubjectUserName from the centralized copy before
+  changing any host state.
+- Inspect the auditpol command and identify success/failure auditing changes. The
+  fixture is text only and performs no policy change.
+- Compare the actor and timing against a documented maintenance or policy rollout
+  ticket.
+- Check whether subsequent Security events continue to arrive. Distinguish a disabled
+  source from a broken shipper or clock skew.
+- For a real case, request policy-change events, collector health, authentication
+  records and independent EDR telemetry covering the missing interval.
+- Escalate unexplained evidence destruction. Restore collection only under the incident
+  lead's approval and preserve the before/after policy state.
+false_positives:
+- A documented maintenance reset may clear a lab log; production resets require explicit
+  approval.
+- Policy rollout can adjust auditing; verify the intended policy and subsequent telemetry
+  availability.
+queries:
+- 'purplelab.scenario: "defense-evasion"'
+- 'event.code: "1102" OR process.name: "auditpol.exe"'
+disposition: Unapproved log clearing or auditing disablement is high priority; the
+  absence of later logs is a collection gap, not evidence of inactivity.

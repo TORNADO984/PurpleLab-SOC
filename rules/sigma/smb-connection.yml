@@ -1,0 +1,26 @@
+title: SMB connection from a script interpreter
+id: 31319808-55f5-5079-9604-e41271523b3a
+status: experimental
+description: An interpreter connecting to SMB is a contextual signal, not proof of
+  remote execution.
+author: PurpleLab-SOC contributors
+date: '2026-11-10'
+license: MIT
+references:
+- https://attack.mitre.org/techniques/T1021/002/
+tags:
+- attack.lateral_movement
+- attack.t1021.002
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 3
+    Image|endswith: \powershell.exe
+    DestinationPort: 445
+  condition: selection
+falsepositives:
+- Approved automation can access SMB shares; verify destination ownership and authentication
+  events.
+level: medium

@@ -1,0 +1,25 @@
+title: Run key points into a user profile
+id: b5a789cb-63da-5dbc-969a-5e2629a221f3
+status: experimental
+description: User-writable autorun targets can provide persistence.
+author: PurpleLab-SOC contributors
+date: '2026-11-10'
+license: MIT
+references:
+- https://attack.mitre.org/techniques/T1547/001/
+tags:
+- attack.persistence
+- attack.t1547.001
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 13
+    TargetObject|contains: \CurrentVersion\Run\
+    Details|contains: \AppData\
+  condition: selection
+falsepositives:
+- User-installed collaboration software commonly uses Run keys; check publisher and
+  installation history.
+level: medium

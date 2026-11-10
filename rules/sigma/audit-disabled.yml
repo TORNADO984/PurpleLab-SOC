@@ -1,0 +1,28 @@
+title: Audit policy disable command
+id: c06f134c-ce0d-5007-b73e-ae03b602a64a
+status: experimental
+description: Disabling auditing can hide later actions. This fixture never changes
+  host policy.
+author: PurpleLab-SOC contributors
+date: '2026-11-10'
+license: MIT
+references:
+- https://attack.mitre.org/techniques/T1562/002/
+tags:
+- attack.defense_evasion
+- attack.t1562.002
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 1
+    Image|endswith: \auditpol.exe
+    CommandLine|contains|all:
+    - /set
+    - disable
+  condition: selection
+falsepositives:
+- Policy rollout can adjust auditing; verify the intended policy and subsequent telemetry
+  availability.
+level: high

@@ -1,0 +1,28 @@
+title: Archive creation in a public directory
+id: df83bda3-25ba-59ed-8132-e59729f6a6a5
+status: experimental
+description: An archive in a shared staging directory can precede transfer; it is
+  not proof of exfiltration.
+author: PurpleLab-SOC contributors
+date: '2026-11-10'
+license: MIT
+references:
+- https://attack.mitre.org/techniques/T1560/001/
+tags:
+- attack.collection
+- attack.t1560.001
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 1
+    Image|endswith: \7z.exe
+    CommandLine|contains|all:
+    - ' a '
+    - \Users\Public\
+  condition: selection
+falsepositives:
+- Support bundles and backups are often archived; verify source data, destination
+  and authorized recipient.
+level: medium

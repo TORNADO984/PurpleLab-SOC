@@ -1,0 +1,25 @@
+title: Service installed from a writable path
+id: 6827f56b-d089-5a6d-8667-649742b792cf
+status: experimental
+description: A service executable in a shared writable directory creates a persistence
+  opportunity.
+author: PurpleLab-SOC contributors
+date: '2026-11-10'
+license: MIT
+references:
+- https://attack.mitre.org/techniques/T1543/003/
+tags:
+- attack.persistence
+- attack.t1543.003
+logsource:
+  product: windows
+  service: system
+detection:
+  selection:
+    EventID: 7045
+    ImagePath|contains: \Users\Public\
+  condition: selection
+falsepositives:
+- Some legacy installers use writable directories; confirm the vendor and remediate
+  weak permissions.
+level: high

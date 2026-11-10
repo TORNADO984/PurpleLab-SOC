@@ -1,0 +1,25 @@
+title: DNS query for the lab beacon domain
+id: a1b4ebbb-cf3b-502d-ad08-9760242b2794
+status: experimental
+description: A lab-only DNS indicator exercises domain matching; it does not detect
+  arbitrary DNS tunneling.
+author: PurpleLab-SOC contributors
+date: '2026-11-10'
+license: MIT
+references:
+- https://attack.mitre.org/techniques/T1071/004/
+tags:
+- attack.command_and_control
+- attack.t1071.004
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 22
+    QueryName|endswith: .purplelab.test
+  condition: selection
+falsepositives:
+- All .purplelab.test queries are training indicators. Replace this indicator for
+  a real environment.
+level: medium

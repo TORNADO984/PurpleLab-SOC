@@ -1,0 +1,25 @@
+title: Interactive user discovery
+id: 1e155ba5-f9ff-5d3d-b5d9-95dae6612564
+status: experimental
+description: Full identity and privilege enumeration is useful after initial access.
+author: PurpleLab-SOC contributors
+date: '2026-11-10'
+license: MIT
+references:
+- https://attack.mitre.org/techniques/T1033/
+tags:
+- attack.discovery
+- attack.t1033
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 1
+    Image|endswith: \whoami.exe
+    CommandLine|contains: /all
+  condition: selection
+falsepositives:
+- Helpdesk scripts often collect identity and group membership; this is a low-confidence
+  behavioral signal.
+level: low

@@ -1,0 +1,26 @@
+title: PowerShell encoded command
+id: a8c94457-cf0a-591b-ab17-f7cfc534ef43
+status: experimental
+description: Encoded script execution can conceal intent; encoding alone is not proof
+  of maliciousness.
+author: PurpleLab-SOC contributors
+date: '2026-11-10'
+license: MIT
+references:
+- https://attack.mitre.org/techniques/T1059/001/
+tags:
+- attack.execution
+- attack.t1059.001
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 1
+    Image|endswith: \powershell.exe
+    CommandLine|contains: -EncodedCommand
+  condition: selection
+falsepositives:
+- Management agents may encode trusted scripts; validate the decoded content and approved
+  deployment.
+level: medium

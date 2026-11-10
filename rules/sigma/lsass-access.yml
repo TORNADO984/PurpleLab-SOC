@@ -1,0 +1,28 @@
+title: Unusual LSASS process access
+id: 386c5daa-b277-5844-a68d-60c199980ce4
+status: experimental
+description: High access masks against LSASS can indicate credential access. This
+  does not prove a dump occurred.
+author: PurpleLab-SOC contributors
+date: '2026-11-10'
+license: MIT
+references:
+- https://attack.mitre.org/techniques/T1003/001/
+tags:
+- attack.credential_access
+- attack.t1003.001
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 10
+    TargetImage|endswith: \lsass.exe
+    GrantedAccess:
+    - '0x1fffff'
+    - '0x1f0fff'
+  condition: selection
+falsepositives:
+- EDR and approved diagnostic tools may access LSASS; corroborate signature, owner
+  and access mask.
+level: high

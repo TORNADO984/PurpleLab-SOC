@@ -1,0 +1,11 @@
+attack_technique: T1033
+display_name: System Owner/User Discovery
+atomic_tests:
+  - name: PurpleLab authorized identity discovery
+    auto_generated_guid: 5bfaf64e-616d-4e36-a3dc-e6b56eea6a10
+    description: Run whoami with group and privilege details inside an authorized disposable Windows VM. No persistent changes.
+    supported_platforms: [windows]
+    executor:
+      name: command_prompt
+      elevation_required: false
+      command: whoami.exe /all

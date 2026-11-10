@@ -1,0 +1,36 @@
+id: command-and-control
+name: Triage lab DNS and unusual egress
+description: A simulator queries a reserved .test domain and PowerShell connects to
+  TCP 4444. Understand the limits of indicator and port-based detections.
+techniques:
+- T1071.001
+- T1071.004
+authorized_use_only: true
+generate: docker compose run --rm lab generate --scenario command-and-control
+validate: docker compose run --rm lab validate --scenario command-and-control
+expected_rules:
+- a1b4ebbb-cf3b-502d-ad08-9760242b2794
+- 8f6149b6-c26a-5fdb-9c96-8e0b22059ef7
+playbook:
+- Extract dns.question.name, process.executable and host. Confirm the .purplelab.test
+  suffix is an intentional lab indicator.
+- Inspect the second event's destination IP, port and process. The 198.51.100.0/24
+  address range is documentation-only.
+- Search nearby DNS and connection events for the same process entity. Do not infer
+  a DNS-to-IP link when one is absent.
+- Request proxy or packet metadata to verify protocol in a real case. TCP 4444 alone
+  cannot prove HTTP, a reverse shell or command and control.
+- Check approved development services and simulation schedules before classifying
+  the behavior.
+- 'Write a validation result plus a tuning proposal: replace lab indicators with reviewed
+  intelligence and combine network context with process ancestry.'
+false_positives:
+- All .purplelab.test queries are training indicators. Replace this indicator for
+  a real environment.
+- Developers may run test services on this port; confirm protocol with proxy or packet
+  evidence.
+queries:
+- 'purplelab.scenario: "command-and-control"'
+- 'event.code: ("22" OR "3")'
+disposition: These fixtures validate field mapping and rule execution. They do not
+  establish general DNS tunneling or protocol detection coverage.

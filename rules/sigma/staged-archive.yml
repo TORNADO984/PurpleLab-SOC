@@ -1,0 +1,24 @@
+title: Archive file created in a public directory
+id: 1aed0717-2831-5548-9200-7ffc65d4b933
+status: experimental
+description: File creation corroborates archive staging but not any subsequent transfer.
+author: PurpleLab-SOC contributors
+date: '2026-11-10'
+license: MIT
+references:
+- https://attack.mitre.org/techniques/T1074/001/
+tags:
+- attack.collection
+- attack.t1074.001
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 11
+    TargetFilename|contains: \Users\Public\
+    TargetFilename|endswith: .zip
+  condition: selection
+falsepositives:
+- Approved support collections can use public folders; review permissions and retention.
+level: medium
