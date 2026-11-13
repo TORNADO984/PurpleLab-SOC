@@ -100,7 +100,17 @@ The gateway also joins a bridge network for localhost port publishing; it forwar
 
 ## Screenshots
 
-Screenshot placeholders are documented in [docs/screenshots/README.md](docs/screenshots/README.md). Capture your validated run's coverage, timeline and alerts after startup. No mock screenshots are presented as operational evidence.
+These screenshots are from a local synthetic validation run. The validator observed all 20 expected rules and no alerts on the 20 benign controls.
+
+**Observed detection alerts**
+
+![PurpleLab event and detection alert tables in Kibana](docs/screenshots/observed-alerts.png)
+
+**Validation result**
+
+![Terminal report showing a passed run with 20 observed rules and no negative alerts](docs/screenshots/validation-result.png)
+
+See [screenshot notes](docs/screenshots/README.md) for additional views to capture.
 
 ## Stop or reset
 

@@ -1,9 +1,8 @@
-# Screenshot placeholders
+# Lab screenshots
 
-Add sanitized screenshots after a successful local validation:
+The README includes two captures from a successful synthetic validation run:
 
-1. `coverage.png`: PurpleLab detection coverage with the run's observed outcomes.
-2. `timeline.png`: timeline filtered to one scenario/run.
-3. `alerts.png`: Security alerts showing the intended detections.
+- `observed-alerts.png`: Kibana event and observed detection alert tables.
+- `validation-result.png`: CLI report showing 20 observed rules, no missing rules, no negative alerts, and no execution errors.
 
-Never capture passwords, session cookies, real identities, private hostnames or sensitive evidence. These files are intentionally absent until an actual UI capture is available; the README does not embed fabricated screenshots.
+Additional useful captures are the detection coverage dashboard and a timeline filtered to a single run. Before adding any image, check that it contains no passwords, session cookies, real identities, private hostnames or sensitive evidence.
